@@ -1,0 +1,28 @@
+version: '3'
+services:
+  # mongoDB:
+  #   image: mongo:6.0
+  #   container_name: mongo
+  #   restart: always
+  #   volumes:
+  #     - ./data:/data/db
+  #   ports:
+  #     - "27017:27017"
+  app:
+    container_name: arrbar
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      - MONGODBPRODUCTION = mongodb+srv://desarrollostecnologicosyga:&XGE3g2E+yuaSzX7@arrbar-distributed.5vicv5o.mongodb.net/arrbar?retryWrites=true&w=majority
+    restart: always
+    ports:
+      - "3000:3000"
+    # depends_on:
+    #   - mongoDB
+    stdin_open: true
+    tty: true
+
+# volumes:
+#   mongoDB: {}
