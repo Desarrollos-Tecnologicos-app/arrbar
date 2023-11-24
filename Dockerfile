@@ -28,4 +28,4 @@ ENV urlPCTECH=https://pchtest.to-do.mx
 EXPOSE $PORT
 
 # Comando para ejecutar la aplicación
-CMD ["npm", "run", "production"]
+CMD ["npm", "run", "start"]
