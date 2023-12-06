@@ -29,7 +29,6 @@ const productsSYSCOM = async ({ body }: Request, res: Response) => {
 }
 
 const productSingle = async ({ body }: Request, res: Response) => {
-
 	try {
 		const { id, origin } = body
 		const response = origin ? await getProductPCTECHByID(id) : await getProductSYSCOMByID(id)

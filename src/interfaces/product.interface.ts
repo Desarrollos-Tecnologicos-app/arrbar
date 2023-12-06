@@ -26,6 +26,7 @@ export interface IProductPcTech {
     peso_neto?: Number,
     linea?: String
     origin: String
+    warehouse: Number
 }
 
 export interface categoriaSYSCOM {
@@ -89,6 +90,7 @@ export interface IProductSYSCOM {
     caracteristicas?: String[],
     imagenes?: imagenesSYSCOM[],
     recursos?: recursosSYSCOM[]
-    origin: String
+    origin?: String
+    warehouse?: Number
 }
 
