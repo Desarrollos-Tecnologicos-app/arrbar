@@ -9,9 +9,6 @@ const router = Router()
 
 router.get("/", Categories)
 
-router.get(
-	"/:id",
-	subCatergories
-)
+router.get("/:id", subCatergories)
 
 export { router }

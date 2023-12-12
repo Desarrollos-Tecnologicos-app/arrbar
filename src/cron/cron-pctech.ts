@@ -1,14 +1,12 @@
 import { schedule} from 'node-cron'
-import { getProductsPcTech, dropCollection } from '../services/products.service';
+import { getProductsPcTech } from '../services/products.service';
 
 const scheduleGetCategories = async () => { 
 
-  schedule('0 */4 * * *', async() => {
-    await dropCollection()
-  })
-
-  schedule('1 */4 * * *', async() => {
+  schedule('0 */2 * * *', async() => {
     await getProductsPcTech()
+  }, {
+    timezone: 'America/Mexico_City'
   })
 
 }

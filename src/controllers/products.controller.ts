@@ -19,9 +19,9 @@ const productsPcTech = async (req: Request, res: Response) => {
 }
 
 const productsSYSCOM = async ({ body }: Request, res: Response) => {
-	const { find } = body
+	const { find, page } = body
 	try {
-		const response = await getProductsSYSCOM(find)
+		const response = await getProductsSYSCOM(find, page)
 		res.send(response)
 	} catch (e) {
 		handleHttp(res, "ERROR_GET_ITEMS")
@@ -31,7 +31,7 @@ const productsSYSCOM = async ({ body }: Request, res: Response) => {
 const productSingle = async ({ body }: Request, res: Response) => {
 	try {
 		const { id, origin } = body
-		const response = origin ? await getProductPCTECHByID(id) : await getProductSYSCOMByID(id)
+		const response = origin === "pctech" ? await getProductPCTECHByID(id) : await getProductSYSCOMByID(id)
 		const data = response ? response : "NOT_FOUND"
 		res.send(data)
 	} catch (e) {

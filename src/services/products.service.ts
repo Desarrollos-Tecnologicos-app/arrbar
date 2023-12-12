@@ -1,32 +1,26 @@
 import axios from "axios"
 import ProductsPCTechModel from "../models/productpctech"
-import { IInventory, IProductPcTech, IProductSYSCOM, categoriaSYSCOM, existenciaSYSCOM } from "../interfaces"
-
-const dropCollection = async () => {
-    return ProductsPCTechModel.deleteMany({})
-}
+import { IInventory, IProductPcTech, IProductSYSCOM, existenciaSYSCOM } from "../interfaces"
 
 const getProductsPcTech = async () => {
+    const responseDelete = ProductsPCTechModel.deleteMany({}).then(async (response) => {
+        return response
+    })
+
+    if ((await responseDelete).acknowledged) {
+        console.log('into')
+        returnAndSaveData()
+    }
+}
+
+const returnAndSaveData = async () => {
+    console.log('return')
     const customerID = process.env.customer
-    const keycustomer = process.env.key
-    const xchange = await axios.post(
-        `${process.env.urlPCTECH}/extcust/getparity`,
-        { customer: customerID, key: keycustomer },
-
-        {
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-            },
-        }
-    )
-
-    try {
-
-        const response =  await axios.post(
-            `${process.env.urlPCTECH}/extcust/getprodlist`,
+        const keycustomer = process.env.key
+        const xchange = await axios.post(
+            `${process.env.urlPCTECH}/extcust/getparity`,
             { customer: customerID, key: keycustomer },
-
+    
             {
                 headers: {
                     'Content-Type': 'application/json',
@@ -34,44 +28,57 @@ const getProductsPcTech = async () => {
                 },
             }
         )
-
-        if (response.data.status === 200) {
-                const products = response.data.data.productos;
-
-                products.forEach(async (product: IProductPcTech) => {
-                    let quantityTotalInventory: Number = 0
-                    let warehouse : Number | any = 0
-                    if (product.inventario?.length) {
-                        product.inventario.map(async (inventory: IInventory) => {
-                            warehouse = inventory.almacen_id
-                            quantityTotalInventory = Number(quantityTotalInventory) + Number(inventory.cantidad)
-                        })
-                    }
-                    product.warehouse = warehouse
-                    product.inventario = []
-                    product.totalinventario = quantityTotalInventory
-                    product.origin = "pctech"
-                    product
-                    if (product.moneda === 'USD') {
-                        product.precioMXN = Number(product.precio) * xchange.data.data[0].USD
-                    }
-                    try {
-                        await ProductsPCTechModel.create({ ...product })
-                            // .then((response) => { console.log('response ', response)})
-                            .catch((error) => { console.error('error ', error) })
-                    } catch (error) {
-                        return error
-                    }
-                });
+    
+        try {    
+            const response =  await axios.post(
+                `${process.env.urlPCTECH}/extcust/getprodlist`,
+                { customer: customerID, key: keycustomer },
+    
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                    },
+                }
+            )
+    
+            if (response.data.status === 200) {
+                    const products = response.data.data.productos;
+    
+                    products.forEach(async (product: IProductPcTech) => {
+                        console.log('product')
+                        let quantityTotalInventory: Number = 0
+                        let warehouse : Number | any = 0
+                        if (product.inventario?.length) {
+                            product.inventario.map(async (inventory: IInventory) => {
+                                warehouse = inventory.almacen_id
+                                quantityTotalInventory = Number(quantityTotalInventory) + Number(inventory.cantidad)
+                            })
+                        }
+                        product.warehouse = warehouse
+                        product.inventario = []
+                        product.totalinventario = quantityTotalInventory
+                        product.origin = "pctech"
+                        if (product.moneda === 'USD') {
+                            product.precioMXN = Number(product.precio) * xchange.data.data[0].USD
+                        }
+                        try {
+                            await ProductsPCTechModel.create({ ...product })
+                                // .then((response) => { console.log('response ', response)})
+                                .catch((error) => { console.error('error ', error) })
+                        } catch (error) {
+                            return error
+                        }
+                    });
+            }
+        } catch (error) {
+            // Manejar el error aquí, por ejemplo, mostrar un mensaje de error al usuario o registrar el error.
+            console.error('Error en la solicitud:', error);
+            throw error; // Puedes volver a lanzar el error si es necesario.
         }
-    } catch (error) {
-        // Manejar el error aquí, por ejemplo, mostrar un mensaje de error al usuario o registrar el error.
-        console.error('Error en la solicitud:', error);
-        throw error; // Puedes volver a lanzar el error si es necesario.
-    }
 }
 
-const getProductsSYSCOM = async (param: String) => {
+const getProductsSYSCOM = async (param: String, page: Number) => {
     return find(null, param, param, null)
 }
 
@@ -199,4 +206,4 @@ const find = async (param: String | null, seccion: String | null, linea: String 
 
 
 
-export { getProductsPcTech, dropCollection, getProductsSYSCOM, getProductPCTECHByID, getProductSYSCOMByID, getProductsByBrand }
+export { getProductsPcTech, getProductsSYSCOM, getProductPCTECHByID, getProductSYSCOMByID, getProductsByBrand }

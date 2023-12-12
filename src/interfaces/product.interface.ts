@@ -90,7 +90,7 @@ export interface IProductSYSCOM {
     caracteristicas?: String[],
     imagenes?: imagenesSYSCOM[],
     recursos?: recursosSYSCOM[]
-    origin?: String
+    origin?: String | "syscom"
     warehouse?: Number
 }
 
