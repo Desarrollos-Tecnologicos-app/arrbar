@@ -79,11 +79,11 @@ const returnAndSaveData = async () => {
 }
 
 const getProductsSYSCOM = async (param: String, page: Number) => {
-    return find(null, param, param, null)
+    return find(null, param, param, null, page)
 }
 
-const getProductsByBrand = async (param: String) => {
-    return find(null, null, null, param)
+const getProductsByBrand = async (param: String, page: Number) => {
+    return find(null, null, null, param, page)
 }
 
 const getProductPCTECHByID = async (id: String) => {
@@ -138,20 +138,24 @@ const getProductSYSCOMByID = async (id: String) => {
     }
 }
 
-const find = async (param: String | null, seccion: String | null, linea: String | null, marca: String | null) => {
+const find = async (param: String | null, seccion: String | null, linea: String | null, marca: String | null, page: Number | 1) => {
     let url: string = ''
     let productsPCTEC: any[] = []
     if (marca) {
         marca = String(marca).toLocaleLowerCase()
-        url = `${process.env.urlSYScom}/productos?marca=${marca}`;
-        marca = String(marca).toUpperCase()
-        productsPCTEC = await ProductsPCTechModel.find({ marca: { $regex: `.*${marca}.*` } })
+        url = `${process.env.urlSYScom}/productos?marca=${marca}&pagina=${page}`;
+        if (page === 1) {
+            marca = String(marca).toUpperCase()
+            productsPCTEC = await ProductsPCTechModel.find({ marca: { $regex: `.*${marca}.*` } })
+        }
     }
     if (seccion && linea) {
-        url = `${process.env.urlSYScom}/productos?busqueda=${seccion}`;
-        seccion = String(seccion).toUpperCase()
-        linea = String(linea).toUpperCase()
-        productsPCTEC = await ProductsPCTechModel.find({ seccion: { $regex: `.*${seccion}.*` }, linea: { $regex: `.*${linea}.*` } })
+        url = `${process.env.urlSYScom}/productos?busqueda=${seccion}&pagina=${page}`;
+        if (page === 1) {
+            seccion = String(seccion).toUpperCase()
+            linea = String(linea).toUpperCase()
+            productsPCTEC = await ProductsPCTechModel.find({ seccion: { $regex: `.*${seccion}.*` }, linea: { $regex: `.*${linea}.*` } })
+        }
     }
 
     const products: IProductSYSCOM[] = []
