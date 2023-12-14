@@ -8,13 +8,11 @@ const getProductsPcTech = async () => {
     })
 
     if ((await responseDelete).acknowledged) {
-        console.log('into')
         returnAndSaveData()
     }
 }
 
 const returnAndSaveData = async () => {
-    console.log('return')
     const customerID = process.env.customer
         const keycustomer = process.env.key
         const xchange = await axios.post(
@@ -46,7 +44,6 @@ const returnAndSaveData = async () => {
                     const products = response.data.data.productos;
     
                     products.forEach(async (product: IProductPcTech) => {
-                        console.log('product')
                         let quantityTotalInventory: Number = 0
                         let warehouse : Number | any = 0
                         if (product.inventario?.length) {
@@ -122,13 +119,16 @@ const getProductSYSCOMByID = async (id: String) => {
     const idFormated = Number(id)
     const url = `${process.env.urlSYScom}/productos/${idFormated}`;
     try {
-        const { data, status } = await axios.get(url, {
+        let { data, status } = await axios.get(url, {
             headers: {
                 'Content-Type': 'application/json',
                 Accept: 'application/json',
                 'Authorization': `${process.env.tkn}`
             }
         })
+
+        data.origin = "syscom"
+        data as IProductSYSCOM
 
         return data
 
@@ -195,6 +195,7 @@ const find = async (param: String | null, seccion: String | null, linea: String 
         })
 
         data.productos.forEach((el: IProductSYSCOM) => {
+            el.origin = "syscom"
             products.push(el)
         })
 

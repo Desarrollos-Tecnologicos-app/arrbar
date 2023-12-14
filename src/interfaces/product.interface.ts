@@ -94,3 +94,23 @@ export interface IProductSYSCOM {
     warehouse?: Number
 }
 
+export interface IProductOrder {
+    producto_id: String
+    cantidad: Number
+    origin: String
+    warehouse?: Number
+    tipo?: String
+}
+
+export interface IOrderPCTECH {
+    warehouse: Number
+    sku: String
+    qty: Number
+}
+
+export interface IOrderSYSCOM {
+    id: Number
+    tipo: String
+    cantidad: Number
+}
+
