@@ -1,16 +1,22 @@
 import { Request, response, Response } from "express"
 import { handleHttp } from "../utils/error.handle"
-import { IOrderPCTECH, IOrderSYSCOM, IProductOrder } from "../interfaces"
+import { ICustomer, IOrderPCTECH, IOrderSYSCOM, IProductOrder } from "../interfaces"
+import { generateOrderPCTECH } from "../services/orders.service"
 
 const filterByProvider = async ({ body }: Request, res: Response) => {
-	const { direccion, productos } = body
+    const { direccion, productos } = body
 
     const products = new Array(productos)[0] as IProductOrder[]
+    const direction = new Array(direccion)[0] as ICustomer
+
+    if (!products.length || !direction) {
+        handleHttp(res, "PRODUCTS EMPTY")
+    }
 
     const orderPCTECH: IOrderPCTECH[] = []
     const orderSYSCOM: IOrderSYSCOM[] = []
 
-    products.forEach((product:IProductOrder) => {
+    products.forEach((product: IProductOrder) => {
         if (product.origin === "pctech") {
             let productpctech: IOrderPCTECH = {
                 qty: product.cantidad,
@@ -37,11 +43,11 @@ const filterByProvider = async ({ body }: Request, res: Response) => {
     if (orderSYSCOM.length) {
         makeOrderSYSCOM(direccion, orderSYSCOM)
     }
-	
+
 }
 
-const makeOrderSYSCOM = async (direccion: any, orderSYSCOM: any) => {
-    console.log('my syscom products ', orderSYSCOM)
+const makeOrderSYSCOM = async (direction: ICustomer, orderSYSCOM: IOrderSYSCOM[]) => {
+    // console.log('my syscom products ', orderSYSCOM)
     /*{
         "tipo_entrega":"domicilio",
         "direccion": {
@@ -73,36 +79,48 @@ const makeOrderSYSCOM = async (direccion: any, orderSYSCOM: any) => {
     }*/
 }
 
-const makeOrderPCTECH = async (direccion: any, orderPCTECH: any) => {
+const makeOrderPCTECH = async (direction: ICustomer, orderPCTECH: IOrderPCTECH[]) => {
     const customer = `${process.env.customer}`;
     const keyCustomer = `${process.env.key}`;
 
-    console.log('my pctech products ', orderPCTECH)
+    const numInt = `${direction.num_int}` ? `${direction.num_int}, ` : ''
 
-    /*
-    {
-        "insurance": false,
-        "ocnumber": "PRUEBA_WS",
-        "receive": "Adalberto Vazquez",
-        "street": "Giusep",
-        "street2": "Estans",
-        "city": "Zapop",
-        "state": "Jal",
-        "zip": "00000",
-        "phone": "Telefono",
-        "spe_delivery" : 25,
-        "ws_guide": "",
-        "products": [
-            {
-                "warehouse": 1,
-                "sku": "179195",
-                "qty": 1
-            }
-        ]
+    let order = {
+        customer: customer,
+        key: keyCustomer,
+        insurance: true,
+        warehouse: orderPCTECH[0].warehouse,
+        ocnumber: `${await cadenaAleatoria(18)}`,
+        receive: `${direction.atencion_a}`,
+        street: `${direction.calle}, ${direction.num_ext}, ${numInt} ${direction.colonia}`,
+        street2: `${direction.calle}, ${direction.num_ext}, ${numInt} ${direction.colonia}`,
+        city: direction.ciudad,
+        state: direction.estado,
+        zip: `${Number(direction.codigo_postal)}`,
+        phone: direction.telefono,
+        spe_delivery: 25,
+        ws_guide: "",
+        products: orderPCTECH
     }
-    */
+
+    await generateOrderPCTECH(order)
+        .then((response) => {
+            return response.data
+        })
+        .catch(err => {
+            return err
+        })
 
 }
+
+const cadenaAleatoria = async (longitud: any) => {
+    const banco = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let aleatoria = "";
+    for (let i = 0; i < longitud; i++) {
+        aleatoria += banco.charAt(Math.floor(Math.random() * banco.length));
+    }
+    return aleatoria;
+};
 
 export {
     filterByProvider
